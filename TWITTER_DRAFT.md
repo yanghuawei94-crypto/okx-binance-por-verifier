@@ -27,7 +27,7 @@ I built a tiny Flask service you can run locally:
 - NO user data stored. NO cookies. NO tracking.
 
 ```bash
-git clone https://github.com/[YOUR_HANDLE]/okx-binance-por-verifier
+git clone https://github.com/yanghuawei94-crypto/okx-binance-por-verifier
 cd okx-binance-por-verifier
 python3 app.py
 curl "http://127.0.0.1:5001/check?address=1CY7fykRLWXeSbKB885Kr4KjQxmDdvW923"

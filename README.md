@@ -46,7 +46,7 @@ Crypto platforms publish their own PoR data — but users have no way to indepen
 
 ```bash
 # Clone (or download as ZIP)
-git clone https://github.com/YOUR_GITHUB_HANDLE/okx-binance-por-verifier.git
+git clone https://github.com/yanghuawei94-crypto/okx-binance-por-verifier.git
 cd okx-binance-por-verifier
 
 # Install dependencies
