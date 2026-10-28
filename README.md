@@ -58,8 +58,14 @@ python3 app.py
 # Test the OKX Top-1 address (10,000+ BTC, verified 2026-10-27)
 curl "http://127.0.0.1:5001/check?address=1CY7fykRLWXeSbKB885Kr4KjQxmDdvW923"
 
+# Check an ETH address (live balance + OKX beacon-chain verification status)
+curl "http://127.0.0.1:5001/check-eth?address=0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
+
 # Check metadata (verification sources, dates, commit hashes)
 curl "http://127.0.0.1:5001/por-meta"
+
+# Open the browser UI
+open "http://127.0.0.1:5001/ui"
 ```
 
 ### Deploy (free, serverless)
@@ -104,6 +110,25 @@ Check if a BTC address is in OKX's verified Top-50 PoR list or Binance's known c
 { "error": "Missing 'address' parameter", "example": "...", "disclaimer": { ... } }
 ```
 
+### `GET /check-eth?address=<ETH_ADDRESS>`
+
+Check live ETH balance plus OKX's ETH beacon-chain verification status.
+
+**Response:**
+```json
+{
+  "address": "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
+  "onchain_balance_eth": 1.23456789,
+  "onchain_status": "ok",
+  "etherscan_result": "ok",
+  "okx_eth_verification": "10/10 sampled addresses matched beacon chain at height 26,105,691 (2026-10-27)",
+  "interpretation": "📊 Real-time on-chain ETH balance: 1.23456789 ETH (Etherscan, independent third-party). OKX ETH verification: 10/10 ...",
+  "disclaimer": { ... }
+}
+```
+
+**Note:** Etherscan's free tier is rate-limited (~5 req/sec, no API key). Occasional `onchain_status: "timeout"` is expected under load — the OKX verification field remains valid regardless.
+
 ### `GET /por-meta`
 
 Metadata about verification sources, dates, and independent proof.
@@ -111,17 +136,24 @@ Metadata about verification sources, dates, and independent proof.
 **Response:**
 ```json
 {
-  "tool_version": "1.0.0",
+  "tool_version": "1.1.0",
+  "supported_chains": ["BTC", "ETH"],
   "okx_top50_btc_addresses_loaded": 50,
   "binance_btc_addresses_loaded": 2,
   "okx_verification_date": "2026-10-27",
-  "okx_verification_result": "50/50 addresses chain-snapshot match; total chain balance 152,691.90 BTC >= snapshot 146,440.59 BTC",
+  "okx_btc_result": "50/50 addresses chain-snapshot match; total chain balance 152,691.90 BTC >= snapshot 146,440.59 BTC",
+  "okx_eth_result": "10/10 sampled addresses matched ETH beacon chain at height 26,105,691",
   "okx_zulk_global_proof": "Ok(()) — verified 2026-10-27 on independent machine, COMMIT_HASH 3aa0802",
   "binance_source": "OKLink public cold-wallet tags + Binance public PoR page",
-  "blockstream_info": "Real-time on-chain balance API, independent third-party",
+  "blockstream_info": "Real-time BTC balance API, independent third-party",
+  "etherscan": "Real-time ETH balance API, independent third-party (free tier, ~5 req/sec)",
   "disclaimer": { ... }
 }
 ```
+
+### `GET /ui`
+
+Zero-dependency static HTML frontend (vanilla JS, no build step, no CDN). Can be served by Flask or dropped onto GitHub Pages as-is.
 
 ---
 
@@ -147,13 +179,14 @@ Metadata about verification sources, dates, and independent proof.
 
 ```
 okx-binance-por-verifier/
-├── app.py                          # Flask service (main entry)
+├── app.py                            # Flask service (BTC + ETH endpoints, /ui frontend)
 ├── data/
 │   └── okx_top50_btc_addresses.json  # Preloaded 50 verified addresses (2026-10-27)
-├── requirements.txt                # Flask, requests
-├── POR_VERIFICATION_DETAILS.md     # Full verification methodology
-├── TWITTER_DRAFT.md                # First public announcement thread
-└── README.md                       # This file
+├── requirements.txt                  # Flask, requests
+├── POR_VERIFICATION_DETAILS.md       # Full verification methodology
+├── TWITTER_DRAFT.md                  # First public announcement thread
+├── deploy.sh                         # One-click git init + commit + deploy guide
+└── README.md                         # This file
 ```
 
 ---
@@ -191,6 +224,7 @@ Contact: Open a GitHub issue. No DMs, no email — all communication must be pub
 
 | Version | Date | Changes |
 |---|---|---|
+| 1.1.0 | 2026-10-28 | Added ETH endpoint (`/check-eth`, Etherscan), static HTML frontend (`/ui`), deploy helper script. OKX ETH beacon-chain sample verification recorded (10/10 at height 26,105,691) |
 | 1.0.0 | 2026-10-28 | Initial release. OKX Top-50 BTC verification, blockstream.info integration, three absolute security declarations |
 
 ---
